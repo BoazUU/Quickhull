@@ -22,6 +22,7 @@ module Quickhull (
 import Data.Array.Accelerate
 import Data.Array.Accelerate.Debug.Trace
 import qualified Prelude                      as P
+import Data.Array.Accelerate.Interpreter (run)
 
 
 -- Points and lines in two-dimensional space
@@ -140,10 +141,17 @@ propagateR = error "TODO: propagateR"
 -- should be:
 -- Vector (Z :. 6) [False,False,True,False,True,True]
 shiftHeadFlagsL :: Acc (Vector Bool) -> Acc (Vector Bool)
-shiftHeadFlagsL = error "TODO: shiftHeadFlagsL"
+shiftHeadFlagsL vectorAcc = do
+  let vectorTail = tail vectorAcc
+  let shiftedList = vectorTail ++ use (fromList (Z:.1) [True])
+    in shiftedList
 
 -- >>> import Data.Array.Accelerate.Interpreter
 -- >>> run $ shiftHeadFlagsR (use (fromList (Z :. 6) [True,False,False,True,False,False]))
+-- TODO: shiftHeadFlagsR
+-- TODO: shiftHeadFlagsR
+-- TODO: shiftHeadFlagsR
+-- TODO: shiftHeadFlagsR
 --
 -- should be:
 -- Vector (Z :. 6) [True,True,False,False,True,False]
