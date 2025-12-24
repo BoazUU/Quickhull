@@ -23,6 +23,9 @@ import Data.Array.Accelerate
 import Data.Array.Accelerate.Debug.Trace
 import qualified Prelude                      as P
 import Data.Array.Accelerate.Interpreter (run)
+import Data.Semigroup (diff)
+import GHC.Conc (par)
+import Data.Array.Accelerate.Smart (undef)
 
 
 -- Points and lines in two-dimensional space
@@ -156,7 +159,10 @@ shiftHeadFlagsL vectorAcc = do
 -- should be:
 -- Vector (Z :. 6) [True,True,False,False,True,False]
 shiftHeadFlagsR :: Acc (Vector Bool) -> Acc (Vector Bool)
-shiftHeadFlagsR = error "TODO: shiftHeadFlagsR"
+shiftHeadFlagsR vectorAcc = do
+  let vectorDrop = take (length vectorAcc - 1) vectorAcc
+  let shiftedList = use (fromList (Z:.1) [True]) ++ vectorDrop
+    in shiftedList
 
 -- >>> import Data.Array.Accelerate.Interpreter
 -- >>> let flags  = fromList (Z :. 9) [True,False,False,True,True,False,False,False,True]
@@ -171,7 +177,25 @@ shiftHeadFlagsR = error "TODO: shiftHeadFlagsR"
 -- non-associative combination functions may seem to work fine here -- only to
 -- fail spectacularly when testing with a parallel backend on larger inputs. ;)
 segmentedScanl1 :: Elt a => (Exp a -> Exp a -> Exp a) -> Acc (Vector Bool) -> Acc (Vector a) -> Acc (Vector a)
-segmentedScanl1 = error "TODO: segmentedScanl1"
+segmentedScanl1 f vb v' = do
+  let zipped = zip vb v'
+  let filtered = filter (\(T2 b _) -> b) zipped
+  let mapped = map (\(T2 _ i) -> i) filtered
+  let partions = partitionSizes (length mapped) mapped
+   in undefined
+  --let scanned = scanl1Seg f v' (use (fromList (Z :. P.length partions) partions))
+   --in scanned
+
+
+partitionSizes :: Int -> Acc (Vector Int) -> Acc (Vector Int)
+partitionSizes a l = do 
+ let ln = drop 1 l ++ use (fromList (Z :. 1) [a])
+ let zipped = zip l ln
+  in take (length zipped) (map tupleDiff zipped)
+  
+tupleDiff :: Exp (Int, Int) -> Exp Int
+tupleDiff (T2 a b) = b - a
+
 
 -- >>> import Data.Array.Accelerate.Interpreter
 -- >>> let flags  = fromList (Z :. 9) [True,False,False,True,True,False,False,False,True]
