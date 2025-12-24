@@ -20,12 +20,7 @@ module Quickhull (
 ) where
 
 import Data.Array.Accelerate
-import Data.Array.Accelerate.Debug.Trace
 import qualified Prelude                      as P
-import Data.Array.Accelerate.Interpreter (run)
-import Data.Semigroup (diff)
-import GHC.Conc (par)
-import Data.Array.Accelerate.Smart (undef)
 
 
 -- Points and lines in two-dimensional space
@@ -179,8 +174,8 @@ shiftHeadFlagsR vectorAcc = do
 segmentedScanl1 :: Elt a => (Exp a -> Exp a -> Exp a) -> Acc (Vector Bool) -> Acc (Vector a) -> Acc (Vector a)
 segmentedScanl1 f vb v' = do
   let zipped = zip vb v'
-  let filtered = filter (\(T2 b _) -> b) zipped
-  let mapped = map (\(T2 _ i) -> i) filtered
+  let (T2 nuttig _) = filter (\(T2 b _) -> b) zipped
+  let mapped = map (\(T2 _ i) -> i) nuttig
   let partions = partitionSizes (length mapped) mapped
    in undefined
   --let scanned = scanl1Seg f v' (use (fromList (Z :. P.length partions) partions))
